@@ -437,10 +437,7 @@ const PLAN = [
 ];
 
 // STATE
-let state = JSON.parse(localStorage.getItem('gymtracker') || '{}');
-// state: { sessions: [{date, dayId, done:{exId:bool}, weights:{exId:kg}, feeling, notes}] }
-if (!state.sessions) state.sessions = [];
-
+let state = { sessions: [] };
 let currentDayId = null;
 let todaySession = null;
 let progressChart = null;
@@ -451,7 +448,51 @@ let timerInterval = null;
 let timerRunning = false;
 let timerStartedAt = null;
 
-function save() { localStorage.setItem('gymtracker', JSON.stringify(state)); }
+// STORAGE — Telegram CloudStorage с fallback на localStorage
+const TG = window.Telegram && window.Telegram.WebApp;
+const CloudStorage = TG && TG.CloudStorage;
+
+function save() {
+  const data = JSON.stringify(state);
+  if (CloudStorage) {
+    CloudStorage.setItem('gymtracker', data);
+  }
+  // Всегда дублируем в localStorage как резерв
+  try { localStorage.setItem('gymtracker', data); } catch(e) {}
+}
+
+function loadState(callback) {
+  if (CloudStorage) {
+    CloudStorage.getItem('gymtracker', (err, val) => {
+      if (!err && val) {
+        try {
+          state = JSON.parse(val);
+          if (!state.sessions) state.sessions = [];
+        } catch(e) { state = { sessions: [] }; }
+      } else {
+        // Fallback: загружаем из localStorage если в облаке пусто
+        try {
+          const local = localStorage.getItem('gymtracker');
+          if (local) {
+            state = JSON.parse(local);
+            if (!state.sessions) state.sessions = [];
+            // Мигрируем локальные данные в облако
+            save();
+          }
+        } catch(e) {}
+      }
+      callback();
+    });
+  } else {
+    // Нет Telegram — только localStorage
+    try {
+      const local = localStorage.getItem('gymtracker');
+      if (local) { state = JSON.parse(local); }
+      if (!state.sessions) state.sessions = [];
+    } catch(e) { state = { sessions: [] }; }
+    callback();
+  }
+}
 
 function today() { return new Date().toISOString().split('T')[0]; }
 
@@ -863,13 +904,23 @@ function showToast(msg) {
 }
 
 // TELEGRAM WebApp integration
-if (window.Telegram && window.Telegram.WebApp) {
-  window.Telegram.WebApp.ready();
-  window.Telegram.WebApp.expand();
+if (TG) {
+  TG.ready();
+  TG.expand();
 }
 
-// INIT
-renderToday();
+// INIT — загружаем данные перед рендером
+document.getElementById('page-today').innerHTML = `
+  <div style="display:flex;align-items:center;justify-content:center;height:60vh;flex-direction:column;gap:12px;">
+    <div style="width:36px;height:36px;border:3px solid #282828;border-top-color:#FFD600;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+    <div style="font-size:13px;color:#888;">Загружаем данные...</div>
+  </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+`;
+
+loadState(() => {
+  renderToday();
+});
 </script>
 </body>
 </html>
