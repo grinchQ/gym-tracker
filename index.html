@@ -120,6 +120,30 @@ body { background:var(--bg); color:var(--white); font-family:-apple-system,'SF P
 .empty-icon { font-size:48px; margin-bottom:12px; }
 .empty-state h3 { font-size:16px; font-weight:600; color:var(--white); margin-bottom:6px; }
 
+/* CALENDAR */
+.cal-month { margin-bottom:24px; }
+.cal-month-title { font-size:15px; font-weight:700; color:var(--white); margin-bottom:10px; padding:0 2px; }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+.cal-dow { text-align:center; font-size:10px; font-weight:600; color:var(--gray2); padding:4px 0 6px; }
+.cal-day {
+  aspect-ratio:1; border-radius:8px; border:1px solid transparent;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  cursor:pointer; position:relative; transition:all .15s;
+  font-size:12px; font-weight:500; color:var(--gray);
+  background:var(--bg2);
+}
+.cal-day:active { opacity:.7; }
+.cal-day.empty { background:none; border-color:transparent; cursor:default; }
+.cal-day.today { border-color:var(--yellow); color:var(--yellow); font-weight:700; }
+.cal-day.has-workout { background:var(--bg3); color:var(--white); }
+.cal-day.has-workout::after { content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%); width:4px; height:4px; border-radius:50%; background:var(--yellow); }
+.cal-day.has-note::before { content:''; position:absolute; top:4px; right:4px; width:4px; height:4px; border-radius:50%; background:var(--gray); }
+.cal-day.has-note.has-workout::before { background:var(--green); }
+.cal-day-workout-badge { font-size:8px; font-weight:700; color:var(--yellow); line-height:1; margin-top:1px; }
+.cal-legend { display:flex; gap:14px; margin-bottom:16px; flex-wrap:wrap; }
+.cal-legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--gray); }
+.cal-legend-dot { width:6px; height:6px; border-radius:50%; }
+
 /* TOAST */
 .toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--yellow); color:#000; padding:10px 20px; border-radius:40px; font-size:13px; font-weight:700; opacity:0; transition:all .25s; z-index:999; white-space:nowrap; pointer-events:none; }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
@@ -162,6 +186,33 @@ body { background:var(--bg); color:var(--white); font-family:-apple-system,'SF P
   <div id="history-content"></div>
 </div>
 
+<div id="page-calendar" class="page">
+  <div class="page-header">
+    <h1>Дневник<span>.</span></h1>
+    <p>Тренировки и заметки</p>
+  </div>
+  <div id="calendar-content"></div>
+</div>
+
+<!-- DAY MODAL -->
+<div id="day-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);align-items:flex-end;">
+  <div style="background:var(--bg2);border-radius:20px 20px 0 0;border-top:1px solid var(--bg4);padding:20px 16px 40px;width:100%;max-height:85vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div id="modal-date-title" style="font-size:18px;font-weight:700;"></div>
+      <button onclick="closeModal()" style="background:var(--bg3);border:none;color:var(--gray);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;">×</button>
+    </div>
+    <div id="modal-workout-info" style="margin-bottom:12px;"></div>
+    <div style="font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Заметка на день</div>
+    <textarea id="modal-note-input" placeholder="Напиши что угодно — самочувствие, питание, мысли..." style="width:100%;background:var(--bg3);border:1px solid var(--bg4);border-radius:10px;color:#fff;font-size:14px;padding:12px;min-height:100px;resize:none;font-family:inherit;" oninput="saveDayNote(this.value)"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button id="modal-voice-btn" onclick="toggleModalVoice()" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--bg4);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+      <button onclick="closeModal()" style="flex:1;padding:12px;background:var(--yellow);color:#000;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Сохранить</button>
+    </div>
+  </div>
+</div>
+
 <nav class="nav">
   <button class="nav-btn active" onclick="showPage('today',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -175,6 +226,10 @@ body { background:var(--bg); color:var(--white); font-family:-apple-system,'SF P
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     <span>История</span>
   </button>
+  <button class="nav-btn" onclick="showPage('calendar',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>Дневник</span>
+  </button>
 </nav>
 
 <div class="toast" id="toast"></div>
@@ -183,34 +238,34 @@ body { background:var(--bg); color:var(--white); font-family:-apple-system,'SF P
 const PLAN = [
   { id:'A', name:'Спина + Плечи', day:'Понедельник', muscles:'Широчайшие · Ромбовидные · Дельты',
     exercises:[
-      {id:'a1',name:'Тяга верхнего блока широким хватом',sets:4,reps:'10–12'},
-      {id:'a2',name:'Горизонтальная тяга блока',sets:4,reps:'10–12'},
-      {id:'a3',name:'Тяга гантели в наклоне',sets:3,reps:'12'},
-      {id:'a4',name:'Жим гантелей сидя',sets:4,reps:'10–12'},
-      {id:'a5',name:'Махи гантелями в стороны',sets:3,reps:'15'},
-      {id:'a6',name:'Тяга штанги к подбородку',sets:3,reps:'12'},
-      {id:'a7',name:'Сгибания запястий',sets:3,reps:'15–20'},
-      {id:'a8',name:'Обратные сгибания запястий',sets:3,reps:'15'},
+      {id:'a1',name:'Тяга верхнего блока широким хватом',sets:4,reps:'10–12',muscle:'широчайшие'},
+      {id:'a2',name:'Горизонтальная тяга блока',sets:4,reps:'10–12',muscle:'ромбовидные, трапеции'},
+      {id:'a3',name:'Тяга гантели в наклоне',sets:3,reps:'12',muscle:'широчайшие, бицепс'},
+      {id:'a4',name:'Жим гантелей сидя',sets:4,reps:'10–12',muscle:'средние дельты'},
+      {id:'a5',name:'Махи гантелями в стороны',sets:3,reps:'15',muscle:'средние дельты'},
+      {id:'a6',name:'Тяга штанги к подбородку',sets:3,reps:'12',muscle:'трапеции, дельты'},
+      {id:'a7',name:'Сгибания запястий',sets:3,reps:'15–20',muscle:'предплечье'},
+      {id:'a8',name:'Обратные сгибания запястий',sets:3,reps:'15',muscle:'предплечье'},
     ]
   },
   { id:'B', name:'Ноги', day:'Среда', muscles:'Квадрицепс · Бицепс бедра · Ягодицы',
     exercises:[
-      {id:'b1',name:'Приседания со штангой / в Смите',sets:4,reps:'10–12'},
-      {id:'b2',name:'Жим ногами в тренажёре',sets:4,reps:'12'},
-      {id:'b3',name:'Выпады с гантелями',sets:3,reps:'10'},
-      {id:'b4',name:'Сгибания ног в тренажёре',sets:3,reps:'12'},
-      {id:'b5',name:'Разгибания ног в тренажёре',sets:3,reps:'12'},
-      {id:'b6',name:'Подъём на носки',sets:4,reps:'15'},
+      {id:'b1',name:'Приседания со штангой / в Смите',sets:4,reps:'10–12',muscle:'квадрицепс, ягодицы'},
+      {id:'b2',name:'Жим ногами в тренажёре',sets:4,reps:'12',muscle:'квадрицепс'},
+      {id:'b3',name:'Выпады с гантелями',sets:3,reps:'10',muscle:'ягодицы, квадрицепс'},
+      {id:'b4',name:'Сгибания ног в тренажёре',sets:3,reps:'12',muscle:'бицепс бедра'},
+      {id:'b5',name:'Разгибания ног в тренажёре',sets:3,reps:'12',muscle:'квадрицепс'},
+      {id:'b6',name:'Подъём на носки',sets:4,reps:'15',muscle:'икры'},
     ]
   },
   { id:'C', name:'Трицепс + Плечи', day:'Пятница', muscles:'Трицепс · Передние дельты · Средние дельты',
     exercises:[
-      {id:'c1',name:'Жим штанги лёжа',sets:4,reps:'10–12'},
-      {id:'c2',name:'Жим гантелей на наклонной',sets:3,reps:'12'},
-      {id:'c3',name:'Разгибания на блоке (трицепс)',sets:4,reps:'12–15'},
-      {id:'c4',name:'Французский жим с гантелью',sets:3,reps:'12'},
-      {id:'c5',name:'Отжимания на брусьях',sets:3,reps:'10–12'},
-      {id:'c6',name:'Махи гантелями в стороны',sets:3,reps:'15'},
+      {id:'c1',name:'Жим штанги лёжа',sets:4,reps:'10–12',muscle:'грудь, трицепс'},
+      {id:'c2',name:'Жим гантелей на наклонной',sets:3,reps:'12',muscle:'верх груди, трицепс'},
+      {id:'c3',name:'Разгибания на блоке (трицепс)',sets:4,reps:'12–15',muscle:'трицепс'},
+      {id:'c4',name:'Французский жим с гантелью',sets:3,reps:'12',muscle:'трицепс'},
+      {id:'c5',name:'Отжимания на брусьях',sets:3,reps:'10–12',muscle:'трицепс, грудь'},
+      {id:'c6',name:'Махи гантелями в стороны',sets:3,reps:'15',muscle:'средние дельты'},
     ]
   }
 ];
@@ -312,6 +367,7 @@ function rerenderActive() {
   if (a.id==='page-today') renderToday();
   if (a.id==='page-progress') renderProgress();
   if (a.id==='page-history') renderHistory();
+  if (a.id==='page-calendar') renderCalendar();
 }
 
 // ── TODAY PAGE ────────────────────────────────────────
@@ -338,18 +394,34 @@ function renderToday() {
   renderNextWorkout(container);
 }
 
+function nextWorkoutDate() {
+  // Suggest next Mon/Wed/Fri from today
+  const t = new Date();
+  const dow = t.getDay(); // 0=Sun,1=Mon,...
+  const targets = [1,3,5]; // Mon Wed Fri
+  for (let i=0;i<7;i++) {
+    const d = new Date(t); d.setDate(t.getDate()+i);
+    if (targets.includes(d.getDay())) {
+      return d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'short'});
+    }
+  }
+  return '';
+}
+
 function renderNextWorkout(container) {
   stopTimerTick();
   const dayId = nextDayId();
   const day = PLAN.find(d => d.id === dayId);
   const total = state.sessions.length;
   const lastDate = total ? formatDate(state.sessions[total-1].date) : null;
+  const nextDate = nextWorkoutDate();
 
   let html = `<div class="next-card">
     <div class="next-card-top">
       <div class="next-label">Следующая тренировка</div>
       <div class="next-title">День ${day.id} — ${day.name}</div>
       <div class="next-sub">${day.muscles}</div>
+      ${nextDate ? `<div style="margin-top:8px;font-size:12px;color:var(--yellow);opacity:.8;">📅 ${nextDate}</div>` : ''}
     </div>
     <button class="start-btn" onclick="startWorkout('${day.id}')">🏋️ Начать тренировку</button>
   </div>`;
@@ -421,7 +493,7 @@ function renderWorkout(container) {
     html += `<div class="exercise-row">
       <button class="ex-check ${done?'done':''}" onclick="toggleEx('${ex.id}')"></button>
       <div class="ex-info">
-        <div class="ex-name ${done?'done':''}">${ex.name}</div>
+        <div class="ex-name ${done?'done':''}">${ex.name}${ex.muscle?' <span style="font-size:11px;color:var(--gray);font-weight:400;">('+ex.muscle+')</span>':''}</div>
         <div class="ex-meta">${ex.sets} подх. × ${ex.reps} повт.</div>
         <div class="ex-weight-wrap">
           <span class="ex-weight-label">Вес:</span>
@@ -668,16 +740,17 @@ function toggleVoice() {
     showToast('🎤 Говори...');
   };
 
+  let accumulated = '';
   recognition.onresult = (e) => {
-    let interim = '', final = '';
+    let interim = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript;
-      else interim += e.results[i][0].transcript;
+      if (e.results[i].isFinal) accumulated += e.results[i][0].transcript + ' ';
+      else interim = e.results[i][0].transcript;
     }
     if (textarea) {
-      const prefix = base && !base.endsWith(' ') ? base + ' ' : base;
-      textarea.value = prefix + final + interim;
-      if (final) { saveNotes(textarea.value); }
+      const prefix = base && base.trim() && !base.endsWith(' ') ? base + ' ' : base;
+      textarea.value = prefix + accumulated + interim;
+      if (accumulated) saveNotes(textarea.value);
     }
   };
 
@@ -700,6 +773,168 @@ function stopVoice() {
     btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
   }
 }
+
+
+// ── CALENDAR PAGE ─────────────────────────────────────
+let modalDate = null;
+let modalRecognition = null;
+let modalListening = false;
+
+function renderCalendar() {
+  const container = document.getElementById('calendar-content');
+  const now = new Date();
+  const todayStr = today();
+
+  // Build day notes index and session index
+  const notesByDate = state.dayNotes || {};
+  const sessionsByDate = {};
+  state.sessions.forEach(s => { sessionsByDate[s.date] = s; });
+
+  const DOW = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+  let html = `<div class="cal-legend">
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--yellow)"></div>Тренировка</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--green)"></div>Заметка + тренировка</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gray)"></div>Только заметка</div>
+  </div>`;
+
+  // Show 12 months from current month
+  for (let m = 0; m < 12; m++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + m, 1);
+    const year = d.getFullYear();
+    const month = d.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    // Monday-based: getDay() returns 0=Sun, adjust
+    let startDow = d.getDay(); // 0=Sun
+    startDow = startDow === 0 ? 6 : startDow - 1; // 0=Mon
+
+    html += `<div class="cal-month"><div class="cal-month-title">${MONTHS[month]} ${year}</div><div class="cal-grid">`;
+    DOW.forEach(d => { html += `<div class="cal-dow">${d}</div>`; });
+
+    // Empty cells before first day
+    for (let i = 0; i < startDow; i++) html += '<div class="cal-day empty"></div>';
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const isToday = dateStr === todayStr;
+      const session = sessionsByDate[dateStr];
+      const hasNote = !!notesByDate[dateStr];
+      const isFuture = dateStr > todayStr;
+
+      let cls = 'cal-day';
+      if (isToday) cls += ' today';
+      if (session) cls += ' has-workout';
+      if (hasNote) cls += ' has-note';
+
+      const badge = session ? `<div class="cal-day-workout-badge">${session.dayId}</div>` : '';
+      const opacity = isFuture ? 'opacity:.4;' : '';
+
+      html += `<div class="${cls}" style="${opacity}" onclick="openDayModal('${dateStr}')">
+        ${day}${badge}
+      </div>`;
+    }
+    html += '</div></div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function openDayModal(dateStr) {
+  modalDate = dateStr;
+  const modal = document.getElementById('day-modal');
+  const titleEl = document.getElementById('modal-date-title');
+  const noteInput = document.getElementById('modal-note-input');
+  const workoutInfo = document.getElementById('modal-workout-info');
+
+  titleEl.textContent = formatDate(dateStr);
+
+  // Show workout info if exists
+  const session = state.sessions.find(s => s.date === dateStr);
+  if (session) {
+    const day = PLAN.find(d => d.id === session.dayId);
+    const done = day.exercises.filter(e => session.done[e.id]).length;
+    workoutInfo.innerHTML = `<div style="background:var(--bg3);border-radius:10px;padding:12px;border:1px solid var(--bg4);">
+      <div style="font-size:11px;color:var(--yellow);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Тренировка</div>
+      <div style="font-size:14px;font-weight:700;">День ${day.id} — ${day.name}</div>
+      <div style="font-size:12px;color:var(--gray);margin-top:4px;">${done}/${day.exercises.length} упр. · ${session.duration ? formatTimer(session.duration) : '—'} · ${session.feeling || '—'}</div>
+    </div>`;
+  } else {
+    workoutInfo.innerHTML = '';
+  }
+
+  // Load existing note
+  if (!state.dayNotes) state.dayNotes = {};
+  noteInput.value = state.dayNotes[dateStr] || '';
+
+  modal.style.display = 'flex';
+  setTimeout(() => noteInput.focus(), 100);
+}
+
+function closeModal() {
+  if (modalListening) stopModalVoice();
+  document.getElementById('day-modal').style.display = 'none';
+  modalDate = null;
+  renderCalendar();
+}
+
+function saveDayNote(val) {
+  if (!modalDate) return;
+  if (!state.dayNotes) state.dayNotes = {};
+  if (val.trim()) state.dayNotes[modalDate] = val;
+  else delete state.dayNotes[modalDate];
+  save();
+}
+
+function toggleModalVoice() {
+  if (modalListening) { stopModalVoice(); return; }
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showToast('Голосовой ввод не поддерживается'); return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  modalRecognition = new SR();
+  modalRecognition.lang = 'ru-RU';
+  modalRecognition.continuous = true;
+  modalRecognition.interimResults = true;
+
+  const btn = document.getElementById('modal-voice-btn');
+  const textarea = document.getElementById('modal-note-input');
+  const base = textarea ? textarea.value : '';
+
+  modalRecognition.onstart = () => {
+    modalListening = true;
+    if (btn) { btn.style.background='#FFD600'; btn.style.borderColor='#FFD600'; btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>'; }
+    showToast('🎤 Говори...');
+  };
+  let modalAccumulated = '';
+  modalRecognition.onresult = (e) => {
+    let interim = '';
+    for (let i=e.resultIndex;i<e.results.length;i++) {
+      if (e.results[i].isFinal) modalAccumulated += e.results[i][0].transcript + ' ';
+      else interim = e.results[i][0].transcript;
+    }
+    if (textarea) {
+      const prefix = base && base.trim() && !base.endsWith(' ') ? base+' ' : base;
+      textarea.value = prefix + modalAccumulated + interim;
+      if (modalAccumulated) saveDayNote(textarea.value);
+    }
+  };
+  modalRecognition.onerror = () => stopModalVoice();
+  modalRecognition.onend = () => stopModalVoice();
+  modalRecognition.start();
+}
+
+function stopModalVoice() {
+  modalListening = false;
+  if (modalRecognition) { try{modalRecognition.stop();}catch(e){} modalRecognition=null; }
+  const btn = document.getElementById('modal-voice-btn');
+  if (btn) { btn.style.background=''; btn.style.borderColor=''; btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>'; }
+}
+
+// Close modal on backdrop click
+document.getElementById('day-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
 
 // ── INIT ──────────────────────────────────────────────
 if (TG) { TG.ready(); TG.expand(); }
