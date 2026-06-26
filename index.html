@@ -8,16 +8,17 @@
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 :root {
-  --bg:#0a0a0a; --bg2:#141414; --bg3:#1e1e1e; --bg4:#282828;
-  --yellow:#FFD600; --ydim:rgba(255,214,0,0.12);
-  --white:#fff; --gray:#888; --gray2:#444;
-  --green:#4ADE80; --red:#F87171;
-  --r:14px; --rs:8px;
+  --bg:#F7F9F7; --bg2:#FFFFFF; --bg3:#F0F4F0; --bg4:#E2E8E2;
+  --yellow:#3DCB54; --ydim:rgba(61,203,84,0.12);
+  --white:#16201A; --gray:#7A8580; --gray2:#B8C2BB;
+  --green:#3DCB54; --red:#F87171;
+  --r:16px; --rs:10px;
+  --shadow:0 1px 3px rgba(20,30,20,0.06), 0 1px 2px rgba(20,30,20,0.04);
 }
 body { background:var(--bg); color:var(--white); font-family:-apple-system,'SF Pro Display','Segoe UI',sans-serif; min-height:100vh; padding-bottom:72px; overflow-x:hidden; }
 
 /* NAV */
-.nav { position:fixed; bottom:0; left:0; right:0; background:var(--bg2); border-top:1px solid var(--bg4); display:flex; z-index:100; padding-bottom:env(safe-area-inset-bottom); }
+.nav { position:fixed; bottom:0; left:0; right:0; background:var(--bg2); border-top:1px solid var(--bg4); display:flex; z-index:100; padding-bottom:env(safe-area-inset-bottom); box-shadow:0 -2px 12px rgba(20,30,20,0.06); }
 .nav-btn { flex:1; padding:10px 4px 8px; background:none; border:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--gray2); transition:color .15s; }
 .nav-btn.active { color:var(--yellow); }
 .nav-btn svg { width:22px; height:22px; }
@@ -32,19 +33,39 @@ body { background:var(--bg); color:var(--white); font-family:-apple-system,'SF P
 .page-header p { font-size:13px; color:var(--gray); margin-top:2px; }
 
 /* CARDS */
-.card { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); padding:16px; margin-bottom:12px; }
+.card { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); padding:16px; margin-bottom:12px; box-shadow:var(--shadow); }
+
+/* MOUNTAIN BG */
+.mountain-bg {
+  position: relative;
+  background: linear-gradient(180deg, #DCEFE0 0%, #EAFBEC 55%, #F7F9F7 100%);
+  overflow: hidden;
+}
+.mountain-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(ellipse 120% 60% at 50% 100%, rgba(247,249,247,0.95) 0%, transparent 60%),
+    linear-gradient(180deg, transparent 0%, rgba(247,249,247,0.4) 100%);
+  z-index: 2;
+}
+.mountain-bg .mtn-svg {
+  position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+  z-index: 1; opacity: 0.9;
+}
+.mountain-bg-content { position: relative; z-index: 3; }
 
 /* HOME — next workout card */
-.next-card { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); overflow:hidden; margin-bottom:16px; }
-.next-card-top { padding:20px; background:linear-gradient(135deg,#1a1500,#0a0a0a); border-bottom:1px solid var(--bg4); }
+.next-card { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); overflow:hidden; margin-bottom:16px; box-shadow:var(--shadow); }
+.next-card-top { padding:20px; position:relative; overflow:hidden; border-bottom:1px solid var(--bg4); }
 .next-label { font-size:11px; font-weight:600; color:var(--yellow); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
 .next-title { font-size:22px; font-weight:700; }
 .next-sub { font-size:13px; color:var(--gray); margin-top:4px; }
-.start-btn { display:block; width:calc(100% - 32px); margin:16px; padding:16px; background:var(--yellow); color:#000; border:none; border-radius:var(--rs); font-size:16px; font-weight:700; cursor:pointer; letter-spacing:.3px; transition:opacity .15s; }
+.start-btn { display:block; width:calc(100% - 32px); margin:16px; padding:16px; background:var(--yellow); color:#fff; border:none; border-radius:var(--rs); font-size:16px; font-weight:700; cursor:pointer; letter-spacing:.3px; transition:opacity .15s; box-shadow:0 4px 14px rgba(61,203,84,0.35); }
 .start-btn:active { opacity:.85; }
 
 /* TIMER BAR */
-.timer-bar { background:var(--bg3); border-radius:var(--r); border:1px solid var(--bg4); padding:12px 16px; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.timer-bar { border-radius:var(--r); border:1px solid var(--bg4); padding:12px 16px; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; box-shadow:var(--shadow); position:relative; overflow:hidden; }
 .timer-left { display:flex; align-items:center; gap:10px; }
 .timer-dot { width:8px; height:8px; border-radius:50%; background:var(--gray2); flex-shrink:0; }
 .timer-dot.running { background:var(--green); animation:pulse 1.2s infinite; }
@@ -55,11 +76,11 @@ body { background:var(--bg); color:var(--white); font-family:-apple-system,'SF P
 .timer-display.running { color:var(--yellow); }
 .timer-controls { display:flex; gap:8px; }
 .tbtn { padding:7px 14px; border-radius:40px; border:1px solid var(--bg4); background:var(--bg4); color:var(--white); font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; }
-.tbtn.primary { background:var(--yellow); color:#000; border-color:var(--yellow); }
+.tbtn.primary { background:var(--yellow); color:#fff; border-color:var(--yellow); }
 .tbtn:active { opacity:.75; }
 
 /* DAY CARD */
-.day-card { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); overflow:hidden; margin-bottom:12px; }
+.day-card { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); overflow:hidden; margin-bottom:12px; box-shadow:var(--shadow); }
 .day-card-header { padding:14px 16px; border-bottom:1px solid var(--bg4); display:flex; align-items:center; justify-content:space-between; }
 .day-card-title { font-size:16px; font-weight:700; }
 .day-card-sub { font-size:12px; color:var(--gray); margin-top:2px; }
@@ -69,7 +90,7 @@ body { background:var(--bg); color:var(--white); font-family:-apple-system,'SF P
 .exercise-row:last-child { border-bottom:none; }
 .ex-check { width:24px; height:24px; border-radius:6px; border:2px solid var(--bg4); background:none; cursor:pointer; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all .15s; }
 .ex-check.done { background:var(--yellow); border-color:var(--yellow); }
-.ex-check.done::after { content:''; width:6px; height:10px; border:2px solid #000; border-top:none; border-left:none; transform:rotate(45deg) translateY(-1px); display:block; }
+.ex-check.done::after { content:''; width:6px; height:10px; border:2px solid #fff; border-top:none; border-left:none; transform:rotate(45deg) translateY(-1px); display:block; }
 .ex-info { flex:1; min-width:0; }
 .ex-name { font-size:14px; font-weight:500; transition:color .15s; }
 .ex-name.done { color:var(--gray2); text-decoration:line-through; }
@@ -91,22 +112,22 @@ body { background:var(--bg); color:var(--white); font-family:-apple-system,'SF P
 .notes-input::placeholder { color:var(--gray2); }
 .notes-input:focus { outline:none; border-color:var(--yellow); }
 
-.finish-btn { width:100%; padding:16px; background:var(--yellow); color:#000; border:none; border-radius:var(--r); font-size:15px; font-weight:700; cursor:pointer; margin-top:4px; transition:opacity .15s; letter-spacing:.3px; }
+.finish-btn { width:100%; padding:16px; background:var(--yellow); color:#fff; border:none; border-radius:var(--r); font-size:15px; font-weight:700; cursor:pointer; margin-top:4px; transition:opacity .15s; letter-spacing:.3px; box-shadow:0 4px 14px rgba(61,203,84,0.3); }
 .finish-btn:active { opacity:.85; }
 
 /* STATS */
 .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
-.stat-card { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); padding:14px 16px; }
+.stat-card { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); padding:14px 16px; box-shadow:var(--shadow); }
 .stat-val { font-size:28px; font-weight:700; color:var(--yellow); line-height:1; }
 .stat-label { font-size:11px; color:var(--gray); margin-top:4px; text-transform:uppercase; letter-spacing:.5px; }
-.chart-wrap { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); padding:16px; margin-bottom:12px; }
+.chart-wrap { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); padding:16px; margin-bottom:12px; box-shadow:var(--shadow); }
 .chart-title { font-size:13px; font-weight:600; color:var(--gray); text-transform:uppercase; letter-spacing:.8px; margin-bottom:14px; }
 .chart-container { position:relative; height:160px; }
 .ex-select { width:100%; background:var(--bg3); border:1px solid var(--bg4); border-radius:var(--rs); color:var(--white); font-size:13px; padding:9px 12px; margin-bottom:14px; appearance:none; }
 .ex-select:focus { outline:none; border-color:var(--yellow); }
 
 /* HISTORY */
-.history-item { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); padding:14px 16px; margin-bottom:10px; }
+.history-item { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); cursor:pointer; }
 .history-item-header { display:flex; align-items:center; justify-content:space-between; }
 .history-date { font-size:13px; font-weight:600; }
 .history-day { font-size:12px; color:var(--gray); margin-top:2px; }
@@ -145,11 +166,11 @@ body { background:var(--bg); color:var(--white); font-family:-apple-system,'SF P
 .cal-legend-dot { width:6px; height:6px; border-radius:50%; }
 
 /* TOAST */
-.toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--yellow); color:#000; padding:10px 20px; border-radius:40px; font-size:13px; font-weight:700; opacity:0; transition:all .25s; z-index:999; white-space:nowrap; pointer-events:none; }
+.toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--yellow); color:#fff; padding:10px 20px; border-radius:40px; font-size:13px; font-weight:700; opacity:0; transition:all .25s; z-index:999; white-space:nowrap; pointer-events:none; }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 /* DONE STATE */
-.done-card { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); padding:24px; text-align:center; margin-bottom:12px; }
+.done-card { background:var(--bg2); border-radius:var(--r); border:1px solid var(--bg4); padding:24px; text-align:center; margin-bottom:12px; box-shadow:var(--shadow); }
 .done-icon { font-size:48px; margin-bottom:12px; }
 .done-title { font-size:20px; font-weight:700; margin-bottom:6px; }
 .done-sub { font-size:13px; color:var(--gray); margin-bottom:20px; }
@@ -208,7 +229,31 @@ body { background:var(--bg); color:var(--white); font-family:-apple-system,'SF P
       <button id="modal-voice-btn" onclick="toggleModalVoice()" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--bg4);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
       </button>
-      <button onclick="closeModal()" style="flex:1;padding:12px;background:var(--yellow);color:#000;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Сохранить</button>
+      <button onclick="closeModal()" style="flex:1;padding:12px;background:var(--yellow);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXERCISE HISTORY MODAL -->
+<div id="ex-history-modal" style="display:none;position:fixed;inset:0;z-index:210;background:rgba(20,30,20,0.5);align-items:flex-end;">
+  <div style="background:var(--bg2);border-radius:20px 20px 0 0;border-top:1px solid var(--bg4);padding:20px 16px 40px;width:100%;max-height:75vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div id="ex-history-title" style="font-size:17px;font-weight:700;"></div>
+      <button onclick="closeExHistory()" style="background:var(--bg3);border:none;color:var(--gray);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;">×</button>
+    </div>
+    <div id="ex-history-content"></div>
+  </div>
+</div>
+
+<!-- CANCEL WORKOUT CONFIRM MODAL -->
+<div id="cancel-confirm-modal" style="display:none;position:fixed;inset:0;z-index:220;background:rgba(20,30,20,0.6);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--bg2);border-radius:18px;padding:24px;width:100%;max-width:320px;text-align:center;box-shadow:0 10px 40px rgba(20,30,20,0.2);">
+    <div style="font-size:32px;margin-bottom:10px;">⚠️</div>
+    <div style="font-size:17px;font-weight:700;margin-bottom:8px;">Отменить тренировку?</div>
+    <div style="font-size:13px;color:var(--gray);margin-bottom:20px;line-height:1.5;">Весь прогресс этой тренировки будет потерян и не сохранится в истории.</div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeCancelConfirm()" style="flex:1;padding:13px;background:var(--bg3);color:var(--white);border:1px solid var(--bg4);border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;">Нет, продолжить</button>
+      <button onclick="confirmCancelWorkout()" style="flex:1;padding:13px;background:#F87171;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">Да, отменить</button>
     </div>
   </div>
 </div>
@@ -238,34 +283,35 @@ body { background:var(--bg); color:var(--white); font-family:-apple-system,'SF P
 const PLAN = [
   { id:'A', name:'Спина + Плечи', day:'Понедельник', muscles:'Широчайшие · Ромбовидные · Дельты',
     exercises:[
-      {id:'a1',name:'Тяга верхнего блока широким хватом',sets:4,reps:'10–12',muscle:'широчайшие'},
-      {id:'a2',name:'Горизонтальная тяга блока',sets:4,reps:'10–12',muscle:'ромбовидные, трапеции'},
-      {id:'a3',name:'Тяга гантели в наклоне',sets:3,reps:'12',muscle:'широчайшие, бицепс'},
-      {id:'a4',name:'Жим гантелей сидя',sets:4,reps:'10–12',muscle:'средние дельты'},
-      {id:'a5',name:'Махи гантелями в стороны',sets:3,reps:'15',muscle:'средние дельты'},
-      {id:'a6',name:'Тяга штанги к подбородку',sets:3,reps:'12',muscle:'трапеции, дельты'},
-      {id:'a7',name:'Сгибания запястий',sets:3,reps:'15–20',muscle:'предплечье'},
-      {id:'a8',name:'Обратные сгибания запястий',sets:3,reps:'15',muscle:'предплечье'},
+      {id:'a1',name:'Тяга верхнего блока широким хватом',sets:4,reps:'8–12',muscle:'широчайшие'},
+      {id:'a2',name:'Горизонтальная тяга блока',sets:4,reps:'8–12',muscle:'ромбовидные, трапеции'},
+      {id:'a3',name:'Тяга гантели в наклоне',sets:3,reps:'8–12',muscle:'широчайшие, бицепс'},
+      {id:'a4',name:'Жим гантелей сидя',sets:4,reps:'8–12',muscle:'средние дельты'},
+      {id:'a5',name:'Махи гантелями в стороны',sets:3,reps:'8–12',muscle:'средние дельты'},
+      {id:'a6',name:'Тяга штанги к подбородку',sets:3,reps:'8–12',muscle:'трапеции, дельты'},
+      {id:'a7',name:'Подъём штанги на бицепс',sets:3,reps:'8–12',muscle:'бицепс'},
+      {id:'a8',name:'Сгибания запястий',sets:3,reps:'8–12',muscle:'предплечье'},
+      {id:'a9',name:'Обратные сгибания запястий',sets:3,reps:'8–12',muscle:'предплечье'},
     ]
   },
   { id:'B', name:'Ноги', day:'Среда', muscles:'Квадрицепс · Бицепс бедра · Ягодицы',
     exercises:[
-      {id:'b1',name:'Приседания со штангой / в Смите',sets:4,reps:'10–12',muscle:'квадрицепс, ягодицы'},
-      {id:'b2',name:'Жим ногами в тренажёре',sets:4,reps:'12',muscle:'квадрицепс'},
-      {id:'b3',name:'Выпады с гантелями',sets:3,reps:'10',muscle:'ягодицы, квадрицепс'},
-      {id:'b4',name:'Сгибания ног в тренажёре',sets:3,reps:'12',muscle:'бицепс бедра'},
-      {id:'b5',name:'Разгибания ног в тренажёре',sets:3,reps:'12',muscle:'квадрицепс'},
-      {id:'b6',name:'Подъём на носки',sets:4,reps:'15',muscle:'икры'},
+      {id:'b1',name:'Приседания со штангой / в Смите',sets:4,reps:'8–12',muscle:'квадрицепс, ягодицы'},
+      {id:'b2',name:'Жим ногами в тренажёре',sets:4,reps:'8–12',muscle:'квадрицепс'},
+      {id:'b3',name:'Выпады с гантелями',sets:3,reps:'8–12',muscle:'ягодицы, квадрицепс'},
+      {id:'b4',name:'Сгибания ног в тренажёре',sets:3,reps:'8–12',muscle:'бицепс бедра'},
+      {id:'b5',name:'Разгибания ног в тренажёре',sets:3,reps:'8–12',muscle:'квадрицепс'},
+      {id:'b6',name:'Подъём на носки',sets:4,reps:'8–12',muscle:'икры'},
     ]
   },
-  { id:'C', name:'Трицепс + Плечи', day:'Пятница', muscles:'Трицепс · Передние дельты · Средние дельты',
+  { id:'C', name:'Трицепс + Плечи', day:'Пятница', muscles:'Трицепс · Передние дельты · Бицепс',
     exercises:[
-      {id:'c1',name:'Жим штанги лёжа',sets:4,reps:'10–12',muscle:'грудь, трицепс'},
-      {id:'c2',name:'Жим гантелей на наклонной',sets:3,reps:'12',muscle:'верх груди, трицепс'},
-      {id:'c3',name:'Разгибания на блоке (трицепс)',sets:4,reps:'12–15',muscle:'трицепс'},
-      {id:'c4',name:'Французский жим с гантелью',sets:3,reps:'12',muscle:'трицепс'},
-      {id:'c5',name:'Отжимания на брусьях',sets:3,reps:'10–12',muscle:'трицепс, грудь'},
-      {id:'c6',name:'Махи гантелями в стороны',sets:3,reps:'15',muscle:'средние дельты'},
+      {id:'c1',name:'Жим штанги лёжа',sets:4,reps:'8–12',muscle:'грудь, трицепс'},
+      {id:'c2',name:'Жим гантелей на наклонной',sets:3,reps:'8–12',muscle:'верх груди, трицепс'},
+      {id:'c3',name:'Разгибания на блоке (трицепс)',sets:4,reps:'8–12',muscle:'трицепс'},
+      {id:'c4',name:'Французский жим с гантелью',sets:3,reps:'8–12',muscle:'трицепс'},
+      {id:'c5',name:'Подъём гантелей на бицепс',sets:3,reps:'8–12',muscle:'бицепс'},
+      {id:'c6',name:'Махи гантелями в стороны',sets:3,reps:'8–12',muscle:'средние дельты'},
     ]
   }
 ];
@@ -417,11 +463,18 @@ function renderNextWorkout(container) {
   const nextDate = nextWorkoutDate();
 
   let html = `<div class="next-card">
-    <div class="next-card-top">
-      <div class="next-label">Следующая тренировка</div>
-      <div class="next-title">День ${day.id} — ${day.name}</div>
-      <div class="next-sub">${day.muscles}</div>
-      ${nextDate ? `<div style="margin-top:8px;font-size:12px;color:var(--yellow);opacity:.8;">📅 ${nextDate}</div>` : ''}
+    <div class="next-card-top mountain-bg">
+      <svg class="mtn-svg" viewBox="0 0 400 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,140 L60,70 L110,120 L170,40 L230,110 L290,55 L340,100 L400,75 L400,200 L0,200 Z" fill="#B7E0BF" opacity="0.55"/>
+        <path d="M0,170 L80,110 L140,150 L200,90 L260,145 L330,100 L400,130 L400,200 L0,200 Z" fill="#8FCC9C" opacity="0.5"/>
+        <path d="M0,190 L100,150 L180,175 L260,140 L400,170 L400,200 L0,200 Z" fill="#5FB873" opacity="0.45"/>
+      </svg>
+      <div class="mountain-bg-content">
+        <div class="next-label">Следующая тренировка</div>
+        <div class="next-title">День ${day.id} — ${day.name}</div>
+        <div class="next-sub">${day.muscles}</div>
+        ${nextDate ? `<div style="margin-top:8px;font-size:12px;color:var(--yellow);opacity:.9;font-weight:600;">📅 ${nextDate}</div>` : ''}
+      </div>
     </div>
     <button class="start-btn" onclick="startWorkout('${day.id}')">🏋️ Начать тренировку</button>
   </div>`;
@@ -462,8 +515,16 @@ function renderWorkout(container) {
   const pct = Math.round(doneCount / day.exercises.length * 100);
   const r = 16, circ = 2*Math.PI*r, dash = (pct/100)*circ;
 
-  let html = `<div class="timer-bar">
-    <div class="timer-left">
+  let html = `<div class="timer-bar mountain-bg">
+    <svg class="mtn-svg" viewBox="0 0 400 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,140 L60,70 L110,120 L170,40 L230,110 L290,55 L340,100 L400,75 L400,200 L0,200 Z" fill="#B7E0BF" opacity="0.55"/>
+        <path d="M0,170 L80,110 L140,150 L200,90 L260,145 L330,100 L400,130 L400,200 L0,200 Z" fill="#8FCC9C" opacity="0.5"/>
+        <path d="M0,190 L100,150 L180,175 L260,140 L400,170 L400,200 L0,200 Z" fill="#5FB873" opacity="0.45"/>
+      </svg>
+    <div class="timer-left mountain-bg-content">
+      <button onclick="requestCancelWorkout()" style="background:var(--bg4);border:none;color:var(--white);width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </button>
       <div class="timer-dot running" id="timer-dot"></div>
       <div>
         <div class="timer-label">Тренировка идёт</div>
@@ -479,11 +540,11 @@ function renderWorkout(container) {
         <div class="day-card-sub">${day.muscles}</div>
       </div>
       <svg width="44" height="44" viewBox="0 0 44 44">
-        <circle cx="22" cy="22" r="${r}" fill="none" stroke="#282828" stroke-width="3"/>
-        <circle cx="22" cy="22" r="${r}" fill="none" stroke="#FFD600" stroke-width="3"
+        <circle cx="22" cy="22" r="${r}" fill="none" stroke="#E2E8E2" stroke-width="3"/>
+        <circle cx="22" cy="22" r="${r}" fill="none" stroke="#3DCB54" stroke-width="3"
           stroke-dasharray="${dash.toFixed(1)} ${(circ-dash).toFixed(1)}"
           stroke-linecap="round" transform="rotate(-90 22 22)"/>
-        <text x="22" y="26" text-anchor="middle" fill="#FFD600" font-size="10" font-weight="700" font-family="-apple-system,sans-serif">${pct}%</text>
+        <text x="22" y="26" text-anchor="middle" fill="#3DCB54" font-size="10" font-weight="700" font-family="-apple-system,sans-serif">${pct}%</text>
       </svg>
     </div>`;
 
@@ -493,7 +554,7 @@ function renderWorkout(container) {
     html += `<div class="exercise-row">
       <button class="ex-check ${done?'done':''}" onclick="toggleEx('${ex.id}')"></button>
       <div class="ex-info">
-        <div class="ex-name ${done?'done':''}">${ex.name}${ex.muscle?' <span style="font-size:11px;color:var(--gray);font-weight:400;">('+ex.muscle+')</span>':''}</div>
+        <div class="ex-name ${done?'done':''}" onclick="openExerciseHistory('${ex.id}')" style="cursor:pointer;">${ex.name}${ex.muscle?' <span style="font-size:11px;color:var(--gray);font-weight:400;">('+ex.muscle+')</span>':''} <span style="color:var(--yellow);font-size:11px;">📊</span></div>
         <div class="ex-meta">${ex.sets} подх. × ${ex.reps} повт.</div>
         <div class="ex-weight-wrap">
           <span class="ex-weight-label">Вес:</span>
@@ -618,6 +679,8 @@ function renderProgress() {
     if (dates[i]===exp.toISOString().split('T')[0]) streak++; else break;
   }
 
+  const avgDuration = total>0 ? Math.round(state.sessions.reduce((a,s)=>a+(s.duration||0),0)/total) : 0;
+
   let html = `<div class="stat-grid">
     <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-label">Всего тренировок</div></div>
     <div class="stat-card"><div class="stat-val">${week}</div><div class="stat-label">На этой неделе</div></div>
@@ -626,6 +689,7 @@ function renderProgress() {
       const d=PLAN.find(p=>p.id===s.dayId);
       return a+(d?Object.keys(s.done).filter(k=>s.done[k]).length:0);
     },0)/total):0}</div><div class="stat-label">Ср. упр. за трен.</div></div>
+    <div class="stat-card" style="grid-column:span 2;"><div class="stat-val">${avgDuration?formatTimer(avgDuration):'—'}</div><div class="stat-label">Среднее время тренировки</div></div>
   </div>`;
 
   html += `<div class="chart-wrap">
@@ -652,8 +716,8 @@ function updateWeightChart(exId) {
   const sessions = state.sessions.filter(s=>s.weights&&s.weights[exId]>0).sort((a,b)=>a.date.localeCompare(b.date));
   progressChart = new Chart(canvas, {
     type:'line',
-    data:{ labels:sessions.map(s=>formatDate(s.date)), datasets:[{ data:sessions.map(s=>s.weights[exId]), borderColor:'#FFD600', backgroundColor:'rgba(255,214,0,0.08)', borderWidth:2, pointBackgroundColor:'#FFD600', pointRadius:4, tension:.3, fill:true }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#888',font:{size:10}},grid:{color:'#1e1e1e'}}, y:{ticks:{color:'#888',font:{size:10},callback:v=>v+' кг'},grid:{color:'#1e1e1e'}} } }
+    data:{ labels:sessions.map(s=>formatDate(s.date)), datasets:[{ data:sessions.map(s=>s.weights[exId]), borderColor:'#3DCB54', backgroundColor:'rgba(61,203,84,0.08)', borderWidth:2, pointBackgroundColor:'#3DCB54', pointRadius:4, tension:.3, fill:true }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#7A8580',font:{size:10}},grid:{color:'#E2E8E2'}}, y:{ticks:{color:'#7A8580',font:{size:10},callback:v=>v+' кг'},grid:{color:'#E2E8E2'}} } }
   });
 }
 
@@ -664,8 +728,8 @@ function drawCompletion() {
   state.sessions.forEach(s=>{ if(byDay[s.dayId]!==undefined) byDay[s.dayId]++; });
   new Chart(canvas, {
     type:'bar',
-    data:{ labels:['А — Спина/Плечи','Б — Ноги','В — Трицепс/Плечи'], datasets:[{ data:[byDay.A,byDay.B,byDay.C], backgroundColor:['rgba(255,214,0,.8)','rgba(255,214,0,.5)','rgba(255,214,0,.3)'], borderRadius:6 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#888',font:{size:10}},grid:{display:false}}, y:{ticks:{color:'#888',font:{size:10},stepSize:1},grid:{color:'#1e1e1e'}} } }
+    data:{ labels:['А — Спина/Плечи','Б — Ноги','В — Трицепс/Плечи'], datasets:[{ data:[byDay.A,byDay.B,byDay.C], backgroundColor:['rgba(61,203,84,.8)','rgba(61,203,84,.5)','rgba(61,203,84,.3)'], borderRadius:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#7A8580',font:{size:10}},grid:{display:false}}, y:{ticks:{color:'#7A8580',font:{size:10},stepSize:1},grid:{color:'#E2E8E2'}} } }
   });
 }
 
@@ -733,9 +797,9 @@ function toggleVoice() {
   recognition.onstart = () => {
     isListening = true;
     if (btn) {
-      btn.style.background = '#FFD600';
-      btn.style.borderColor = '#FFD600';
-      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+      btn.style.background = '#3DCB54';
+      btn.style.borderColor = '#3DCB54';
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
     }
     showToast('🎤 Говори...');
   };
@@ -903,7 +967,7 @@ function toggleModalVoice() {
 
   modalRecognition.onstart = () => {
     modalListening = true;
-    if (btn) { btn.style.background='#FFD600'; btn.style.borderColor='#FFD600'; btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>'; }
+    if (btn) { btn.style.background='#3DCB54'; btn.style.borderColor='#3DCB54'; btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>'; }
     showToast('🎤 Говори...');
   };
   let modalAccumulated = '';
@@ -935,6 +999,65 @@ function stopModalVoice() {
 document.getElementById('day-modal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+
+
+// ── CANCEL WORKOUT CONFIRMATION ───────────────────────
+function requestCancelWorkout() {
+  document.getElementById('cancel-confirm-modal').style.display = 'flex';
+}
+function closeCancelConfirm() {
+  document.getElementById('cancel-confirm-modal').style.display = 'none';
+}
+function confirmCancelWorkout() {
+  state.activeSession = null;
+  save();
+  stopTimerTick();
+  closeCancelConfirm();
+  showToast('Тренировка отменена');
+  renderToday();
+}
+
+// ── EXERCISE WEIGHT HISTORY ────────────────────────────
+function openExerciseHistory(exId) {
+  // Find exercise definition
+  let exDef = null, parentDay = null;
+  PLAN.forEach(d => { const f = d.exercises.find(e=>e.id===exId); if (f) { exDef = f; parentDay = d; } });
+  if (!exDef) return;
+
+  const modal = document.getElementById('ex-history-modal');
+  const titleEl = document.getElementById('ex-history-title');
+  const contentEl = document.getElementById('ex-history-content');
+
+  titleEl.textContent = exDef.name;
+
+  const past = state.sessions
+    .filter(s => s.weights && s.weights[exId] > 0)
+    .sort((a,b) => b.date.localeCompare(a.date));
+
+  if (!past.length) {
+    contentEl.innerHTML = `<div style="text-align:center;padding:30px 10px;color:var(--gray);">
+      <div style="font-size:32px;margin-bottom:10px;">📊</div>
+      <div style="font-size:13px;">Пока нет истории по этому упражнению</div>
+    </div>`;
+  } else {
+    const maxW = Math.max(...past.map(s => s.weights[exId]));
+    let html = `<div style="font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;">Последние результаты</div>`;
+    past.slice(0, 15).forEach(s => {
+      const w = s.weights[exId];
+      const isMax = w === maxW;
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bg3);">
+        <div style="font-size:13px;color:var(--gray);">${formatDate(s.date)}</div>
+        <div style="font-size:15px;font-weight:700;${isMax?'color:var(--yellow);':''}">${w} кг ${isMax?'🏆':''}</div>
+      </div>`;
+    });
+    contentEl.innerHTML = html;
+  }
+
+  modal.style.display = 'flex';
+}
+function closeExHistory() {
+  document.getElementById('ex-history-modal').style.display = 'none';
+}
 
 // ── INIT ──────────────────────────────────────────────
 if (TG) { TG.ready(); TG.expand(); }
